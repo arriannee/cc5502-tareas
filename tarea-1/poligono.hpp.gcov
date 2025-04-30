@@ -1,0 +1,117 @@
+        -:    0:Source:poligono.hpp
+        -:    0:Graph:poligono_tests.gcno
+        -:    0:Data:poligono_tests.gcda
+        -:    0:Runs:1
+        -:    1:#ifndef POLIGONO_HPP
+        -:    2:#define POLIGONO_HPP
+        -:    3:
+        -:    4:#include <iostream>
+        -:    5:#include <vector>
+        -:    6:#include <cmath>
+        -:    7:#include <algorithm> // para std::reverse
+        -:    8:#include "punto.hpp"
+        -:    9:
+        -:   10:template <typename T>
+        -:   11:class Poligono {
+        -:   12:private:
+        -:   13:    std::vector<Punto<T>> vertices;
+        -:   14:
+        -:   15:public:
+        -:   16:    // Constructor por defecto
+        -:   17:    Poligono() = default;
+        -:   18:
+        -:   19:    // Constructor que recibe un vector de puntos
+        1:   20:    Poligono(const std::vector<Punto<T>>& puntos) : vertices(puntos) {}
+        -:   21:
+        -:   22:    // Agrega un punto al polígono
+        -:   23:    void agregar_vertice(const Punto<T>& p) {
+        -:   24:        vertices.push_back(p);
+        -:   25:    }
+        -:   26:
+        -:   27:    // Retorna el número de vértices
+        1:   28:    int num_vertices() const {
+        1:   29:        return vertices.size();
+        -:   30:    }
+        -:   31:
+        -:   32:    // Retorna true si está en counterclockwise
+        5:   33:    bool es_ccw() const {
+        5:   34:        return area2() > 0;
+        -:   35:    }
+        -:   36:
+        -:   37:    // Invierte el orden si está en sentido horario
+        1:   38:    void hacer_ccw() {
+        1:   39:        if (!es_ccw()) {
+        1:   40:            std::reverse(vertices.begin(), vertices.end());
+        -:   41:        }
+        1:   42:    }
+        -:   43:
+        -:   44:    // Calcula el doble del área (shoelace sin dividir)
+        -:   45:    T area2() const;
+        -:   46:
+        -:   47:    // Calcula el área real (como double)
+        1:   48:    double area() const {
+        1:   49:        return std::abs(static_cast<double>(area2())) / 2.0;
+        -:   50:    }
+        -:   51:
+        -:   52:    // Calcula el perímetro
+        -:   53:    double perimetro() const;
+        -:   54:
+        -:   55:    // Acceso a vértices por índice
+        1:   56:    Punto<T>& operator[](int i) {
+        1:   57:        return vertices[i];
+        -:   58:    }
+        -:   59:
+        -:   60:    const Punto<T>& operator[](int i) const {
+        -:   61:        return vertices[i];
+        -:   62:    }
+        -:   63:
+        -:   64:    // Operador << para imprimir el polígono
+        1:   65:    friend std::ostream& operator<<(std::ostream& os, const Poligono<T>& poly) {
+        1:   66:        os << "[";
+        4:   67:        for (size_t i = 0; i < poly.vertices.size(); ++i) {
+        3:   68:            os << poly.vertices[i];
+        3:   69:            if (i != poly.vertices.size() - 1)
+        2:   70:                os << ", ";
+        -:   71:        }
+        1:   72:        os << "]";
+        1:   73:        return os;
+        -:   74:    }
+        -:   75:};
+        -:   76:
+        -:   77:// Implementación de área2
+        -:   78:template <typename T>
+        7:   79:T Poligono<T>::area2() const {
+        7:   80:    T suma = 0;
+        7:   81:    int n = vertices.size();
+       7*:   82:    if (n < 3) return 0;
+        -:   83:
+       28:   84:    for (int i = 0; i < n; ++i) {
+       21:   85:        const Punto<T>& a = vertices[i];
+       21:   86:        const Punto<T>& b = vertices[(i + 1) % n];
+       21:   87:        suma += a.get_x() * b.get_y() - b.get_x() * a.get_y();
+        -:   88:    }
+        -:   89:
+        7:   90:    return suma;
+        -:   91:}
+        -:   92:
+        -:   93:// Implementación de perímetro
+        -:   94:template <typename T>
+        1:   95:double Poligono<T>::perimetro() const {
+        1:   96:    double suma = 0.0;
+        1:   97:    int n = vertices.size();
+       1*:   98:    if (n < 2) return 0.0;
+        -:   99:
+        4:  100:    for (int i = 0; i < n; ++i) {
+        3:  101:        const Punto<T>& a = vertices[i];
+        3:  102:        const Punto<T>& b = vertices[(i + 1) % n];
+        -:  103:
+        3:  104:        double dx = static_cast<double>(b.get_x() - a.get_x());
+        3:  105:        double dy = static_cast<double>(b.get_y() - a.get_y());
+        -:  106:
+        3:  107:        suma += std::sqrt(dx * dx + dy * dy);
+        -:  108:    }
+        -:  109:
+        1:  110:    return suma;
+        -:  111:}
+        -:  112:
+        -:  113:#endif
