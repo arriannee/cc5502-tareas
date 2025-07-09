@@ -12,7 +12,7 @@ public:
     virtual ~ConvexHullStrategy() = default;
 };
 
-// Gift Wrapping Algorithm (Jarvis March)
+// Gift Wrapping Algorithm
 class GiftWrappingAlgorithm : public ConvexHullStrategy {
 public:
     Poligono<double> apply(const std::vector<Punto<double>>& cloud) override;
